@@ -1,0 +1,18 @@
+group 'de.craxy.pitemp'
+version '0.1.0'
+
+apply plugin: 'java'
+
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'io.javalin:javalin:3.5.0'
+    compile 'org.slf4j:slf4j-simple:1.7.26'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
