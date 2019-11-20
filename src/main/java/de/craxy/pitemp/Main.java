@@ -14,7 +14,12 @@ public class Main {
      */
     public static void main(String[] args) {
         ArgsParser parser = new ArgsParser(args);
-        new PiTemp(parser.getIntValue("port").orElse(8080), parser.getBooleanValue("ssl").orElse(false), parser.getStringValue("context").orElse("/"));
+        new PiTemp(parser.getIntValue("port").orElse(80),
+                parser.getBooleanValue("ssl").orElse(false),
+                parser.getIntValue("sslport").orElse(443),
+                parser.getStringValue("context").orElse("/"),
+                parser.getStringValue("sslcertlocation").orElse(null),
+                parser.getStringValue("keystorepassword").orElse(null));
     }
 
 }
