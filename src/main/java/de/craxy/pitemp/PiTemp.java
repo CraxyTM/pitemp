@@ -1,6 +1,7 @@
 package de.craxy.pitemp;
 
 import de.craxy.pitemp.handler.TemperatureHandler;
+import de.craxy.pitemp.temperature.TemperatureReader;
 import io.javalin.Javalin;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -9,6 +10,9 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The main class of the program. Initializes Javalin and starts the server.
@@ -20,28 +24,35 @@ public class PiTemp {
     private static final Logger LOGGER = LoggerFactory.getLogger(PiTemp.class);
 
     /**
-     * Create a new PiTemp Server with the given parameters.
-     * @param httpPort the http port to run on.
-     * @param ssl whether or not ssl should be enabled.
-     * @param sslPort required if ssl is true. Sets the port for https.
-     * @param context the context of the server.
-     * @param sslCertLocation required if ssl is true. Sets the location of the ssl certificate.
+     * Create a new PiTemp server with the given parameters and starts the temperature reader.
+     *
+     * @param httpPort         the http port to run on.
+     * @param ssl              whether or not ssl should be enabled.
+     * @param sslPort          required if ssl is true. Sets the port for https.
+     * @param context          the context of the server.
+     * @param sslCertLocation  required if ssl is true. Sets the location of the ssl certificate.
      * @param keystorePassword required if ssl true. Sets the password for the ssl certificate.
      */
-    public PiTemp(int httpPort, boolean ssl, int sslPort, @Nullable String context, @Nullable String sslCertLocation, @Nullable String keystorePassword) {
+    public PiTemp(int httpPort, boolean ssl, int sslPort, @Nullable String context, @Nullable String sslCertLocation, @Nullable String keystorePassword, @Nullable String temperatureFilePath) {
         if (ssl && (sslCertLocation == null || keystorePassword == null)) {
             throw new IllegalStateException("sslCertLocation and keystorePassword are required when enabling ssl!");
         }
+
+        TemperatureReader temperatureReader = temperatureFilePath == null ? new TemperatureReader() : new TemperatureReader(temperatureFilePath);
+        temperatureReader.startReading(1, TimeUnit.SECONDS);
 
         Javalin javalin = Javalin.create(javalinConfig -> {
             javalinConfig.showJavalinBanner = false;
             javalinConfig.contextPath = context == null ? "/" : context;
             javalinConfig.enforceSsl = ssl;
             if (ssl) {
+                if (!(new File(sslCertLocation)).exists()) {
+                    throw new IllegalArgumentException("SSL cert file does not exist.");
+                }
                 javalinConfig.server(() -> {
                     Server server = new Server();
                     SslContextFactory sslContextFactory = new SslContextFactory();
-                    sslContextFactory.setKeyStorePath(PiTemp.class.getResource(sslCertLocation).toExternalForm());
+                    sslContextFactory.setKeyStorePath(sslCertLocation);
                     sslContextFactory.setKeyStorePassword(keystorePassword);
                     ServerConnector sslConnector = new ServerConnector(server, sslContextFactory);
                     sslConnector.setPort(sslPort);
@@ -53,12 +64,11 @@ public class PiTemp {
             }
         });
 
-        javalin.get("/temperature", new TemperatureHandler());
+        javalin.get("/temperature", new TemperatureHandler(temperatureReader));
 
         javalin.start(httpPort);
         Runtime.getRuntime().addShutdownHook(new Thread(javalin::stop));
 
         LOGGER.info("Successfully started server!");
     }
-
 }
