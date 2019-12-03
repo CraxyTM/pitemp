@@ -7,6 +7,7 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +25,32 @@ public class PiTemp {
     private static final Logger LOGGER = LoggerFactory.getLogger(PiTemp.class);
 
     /**
+     * Creates a new PiTemp server with partial default settings.
+     *
+     * @param httpPort            the desired http port.
+     * @param temperatureFilePath the path to the temperature file. The temperature file should contain the temperature in 1000°C in the first line.
+     */
+    public PiTemp(int httpPort, @NotNull String temperatureFilePath) {
+        new PiTemp(httpPort, false, 0, null, null, null, temperatureFilePath);
+    }
+
+    /**
+     * Creates a new PiTemp server with the default settings, which starts a new http server on port 80 without ssl.
+     */
+    public PiTemp() {
+        new PiTemp(80, false, 0, null, null, null, null);
+    }
+
+    /**
      * Create a new PiTemp server with the given parameters and starts the temperature reader.
      *
-     * @param httpPort         the http port to run on.
-     * @param ssl              whether or not ssl should be enabled.
-     * @param sslPort          required if ssl is true. Sets the port for https.
-     * @param context          the context of the server.
-     * @param sslCertLocation  required if ssl is true. Sets the location of the ssl certificate.
-     * @param keystorePassword required if ssl true. Sets the password for the ssl certificate.
+     * @param httpPort            the http port to run on.
+     * @param ssl                 whether or not ssl should be enabled.
+     * @param sslPort             required if ssl is true. Sets the port for https.
+     * @param context             the context of the server.
+     * @param sslCertLocation     required if ssl is true. Sets the location of the ssl certificate.
+     * @param keystorePassword    required if ssl true. Sets the password for the ssl certificate.
+     * @param temperatureFilePath The temperature file should contain the temperature in 1000°C in the first line.
      */
     public PiTemp(int httpPort, boolean ssl, int sslPort, @Nullable String context, @Nullable String sslCertLocation, @Nullable String keystorePassword, @Nullable String temperatureFilePath) {
         if (ssl && (sslCertLocation == null || keystorePassword == null)) {
