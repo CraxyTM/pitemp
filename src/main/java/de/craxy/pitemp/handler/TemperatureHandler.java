@@ -6,6 +6,9 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A @{@link Handler} that responds to all requests regarding the temperature reading.
+ */
 public class TemperatureHandler implements Handler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TemperatureHandler.class);
