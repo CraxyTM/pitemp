@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+    <logger name="de.craxy.pitemp" level="INFO" />
+    <logger name="org.eclipse.jetty" level="INFO" />
+    <logger name="io.javalin" level="INFO" />
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%yellow([%d{HH:mm:ss.SSS}]) %green(%-10([%.7thread])) %highlight(%-10level)
+                %cyan(%-33(%.30logger{30})) - %magenta(%msg %n)
+            </pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+</configuration>
