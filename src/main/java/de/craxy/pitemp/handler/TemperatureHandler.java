@@ -26,6 +26,7 @@ public class TemperatureHandler implements Handler {
     public void handle(@NotNull Context ctx) {
         ctx.status(200);
         //TODO: parameter for temperature unit
+        //TODO: unit tests
         ctx.json(new TemperatureResponse(temperatureReader.getLatestTemp(TemperatureUnit.CELSIUS), TemperatureUnit.CELSIUS));
     }
 }
