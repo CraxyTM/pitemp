@@ -24,6 +24,8 @@ public class PiTemp {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PiTemp.class);
 
+    private Javalin javalin;
+
     /**
      * Creates a new PiTemp server with partial default settings.
      *
@@ -60,7 +62,7 @@ public class PiTemp {
         TemperatureReader temperatureReader = temperatureFilePath == null ? new TemperatureReader() : new TemperatureReader(temperatureFilePath);
         temperatureReader.startReading(1, TimeUnit.SECONDS);
 
-        Javalin javalin = Javalin.create(javalinConfig -> {
+        this.javalin = Javalin.create(javalinConfig -> {
             javalinConfig.showJavalinBanner = false;
             javalinConfig.contextPath = context == null ? "/" : context;
             javalinConfig.enforceSsl = ssl;
@@ -83,11 +85,22 @@ public class PiTemp {
             }
         });
 
-        javalin.get("/temperature", new TemperatureHandler(temperatureReader));
+        this.javalin.get("/temperature", new TemperatureHandler(temperatureReader));
 
-        javalin.start(httpPort);
-        Runtime.getRuntime().addShutdownHook(new Thread(javalin::stop));
+        this.javalin.start(httpPort);
+        Runtime.getRuntime().addShutdownHook(new Thread(this.javalin::stop));
 
         LOGGER.info("Successfully started server!");
     }
+
+    /**
+     * Stops the server, if online.
+     */
+    public void stop() {
+        if(this.javalin != null) {
+            this.javalin.stop();
+            this.javalin = null;
+        }
+    }
+
 }
