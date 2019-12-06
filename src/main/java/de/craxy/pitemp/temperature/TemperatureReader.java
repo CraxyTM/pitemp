@@ -56,6 +56,7 @@ public class TemperatureReader {
      * @param timeUnit the time unit of the delay.
      */
     public void startReading(long delay, TimeUnit timeUnit) {
+        stopReading();
         this.executorService = Executors.newSingleThreadScheduledExecutor();
         this.executorService.scheduleWithFixedDelay(this::readTemperature, 0, delay, timeUnit);
         LOGGER.info("Started temperature scheduler!");
@@ -65,7 +66,10 @@ public class TemperatureReader {
      * Stops the reading of the temperature.
      */
     public void stopReading() {
-        this.executorService.shutdown();
+        if (this.executorService != null) {
+            this.executorService.shutdown();
+            this.executorService = null;
+        }
     }
 
     /**
